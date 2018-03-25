@@ -1,0 +1,25 @@
+{
+  "name": "driveindexer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "dependencies": {
+    "moment": "^2.21.0",
+    "xmlhttprequest": "^1.8.0",
+    "typescript": "^2.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raspyweather/driveIndexer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raspyweather/driveIndexer/issues"
+  },
+  "homepage": "https://github.com/raspyweather/driveIndexer#readme"
+}

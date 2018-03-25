@@ -1,7 +1,7 @@
 import * as httpHandler from './httpHandler';
 import {ImageCollection} from "./imageCollection";
 import {drive} from "./drive";
-import { drives} from "./driveConfig";
+import {drives} from "./driveConfig";
 import {firebaseConfig} from "./firebaseConfig";
 
 
