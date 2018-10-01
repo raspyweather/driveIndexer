@@ -6,7 +6,7 @@ export class ImageCollection {
 
     private static noaaRegex1 = new RegExp(/noaa-\d{2}-\d{12}-\w{1,13}\.jpg/);
 
-    private addImage(file: { id: string, name: string }, apiKeyIndex: number) {
+    private addImage(file: { id: string, name: string }, apiKeyIdx: number) {
         const {name, id} = file;
         if (ImageCollection.noaaRegex1.test(name)) {
             const satelliteName = name.substr(0, 7);
@@ -17,18 +17,26 @@ export class ImageCollection {
             const modeIdx = ImageCollection.addIfNotExist(this.imageModes, mode);
 
             const node = this.getOrCreateDataNode(date);
+            if (node.some(item => item.modeIdx === modeIdx &&
+                    item.satelliteIdx === satelliteIdx &&
+                    item.apiKeyIdx === apiKeyIdx
+                )) {
+                ImageCollection.notAddedCtr++;
+                return;
+            }
             node.push({
                 modeIdx,
                 satelliteIdx,
-                apiKeyIndex,
+                apiKeyIdx,
                 id
             });
             return;
         }
+
         console.log("unknown format:" + JSON.stringify(file));
     }
 
-    private getOrCreateDataNode(date: Date): any {
+    private getOrCreateDataNode(date: Date) {
         if (!this.data) {
             console.log("this.data undefined!" + this.data);
             throw new Error();
@@ -62,10 +70,29 @@ export class ImageCollection {
     private static addIfNotExist(collection: any[], element: any): number {
         const idx = collection.indexOf(element);
         if (idx !== -1) {
+            this.notAddedCtr++;
             return idx;
         }
         collection.push(element);
         return collection.indexOf(element);
+    }
+
+
+    public setInitialData(data: { apiKeys: string[], data: any, imageModes: string[], satellites: string[] }) {
+        if (this.apiKeys === undefined || this.apiKeys.length > 0) {
+            throw "Cannot set initial to a dirty ImageCollection";
+        }
+        this.apiKeys = data.apiKeys;
+        this.data = data.data;
+        this.imageModes = data.imageModes;
+        this.satellites = data.satellites;
+    }
+
+    private static notAddedCtr: number = 0;
+
+
+    public get notAddedCounter(): number {
+        return ImageCollection.notAddedCtr;
     }
 
     private apiKeys: string[] = [];
