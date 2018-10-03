@@ -6,7 +6,8 @@ import {firebaseConfig} from "./firebaseConfig";
 
 httpHandler.get({url: firebaseConfig.url}).then(result => {
     const collection = new ImageCollection();
-    collection.setInitialData(JSON.parse(result));
+    console.log(Object.keys(JSON.parse(result).data).length);
+//    collection.setInitialData(JSON.parse(result));
     console.log("stuff added");
     Promise.all(drives.map(config => new drive(config.key, config.folder).driveResult))
         .then(results =>
@@ -15,6 +16,6 @@ httpHandler.get({url: firebaseConfig.url}).then(result => {
         .then(async () => await httpHandler.put({
             url: `${firebaseConfig.url}?print=silent`,
             body: JSON.stringify(collection)
-        })).then(x => console.log("success:" + x+ " notadded:"+collection.notAddedCounter)).catch(err => console.error(err));
-}).catch(err => console.error(err))
+        })).then(x => console.log("success:" + x+ " dt"+Object.keys(JSON.parse(JSON.stringify(collection)).data).length+" notadded:"+collection.notAddedCounter)).catch(err => console.error(err));
+}).catch(err => console.error(err));
 
