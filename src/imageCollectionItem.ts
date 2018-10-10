@@ -1,5 +1,5 @@
 interface ImageCollectionItem {
-    [key: number]: ImageCollectionSubItem[]
+    [key: string]: ImageCollectionSubItem[]
 }
 
 interface ImageCollectionSubItem {

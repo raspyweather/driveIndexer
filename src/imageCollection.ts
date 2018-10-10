@@ -1,22 +1,22 @@
+import {FileDate, NoaaFileParser} from "./FileDate";
+
 export class ImageCollection {
     public addImages(files: { id: string, name: string }[], apiKey: string) {
         const apiKeyIdx = ImageCollection.addIfNotExist(this.apiKeys, apiKey);
         files.forEach(file => this.addImage(file, apiKeyIdx));
     }
 
-    private static noaaRegex1 = new RegExp(/noaa-\d{2}-\d{12}-\w{1,13}\.jpg/);
 
     private addImage(file: { id: string, name: string }, apiKeyIdx: number) {
-        const {name, id} = file;
-        if (ImageCollection.noaaRegex1.test(name)) {
-            const satelliteName = name.substr(0, 7);
-            const date = ImageCollection.parseDateYYYYMMDDhhmm(name.substr(8, 12));
-            const mode = name.substring(21, name.indexOf(".jpg"));
+        const {id} = file;
+        try {
+            const noaaData = NoaaFileParser.parse(file.name);
 
-            const satelliteIdx = ImageCollection.addIfNotExist(this.satellites, satelliteName);
-            const modeIdx = ImageCollection.addIfNotExist(this.imageModes, mode);
+            const satelliteIdx = ImageCollection.addIfNotExist(this.satellites, noaaData.satelliteName);
+            const modeIdx = ImageCollection.addIfNotExist(this.imageModes, noaaData.mode);
 
-            const node = this.getOrCreateDataNode(date);
+            const node = this.getOrCreateDataNode(noaaData.date);
+
             if (node.some(item => item.modeIdx === modeIdx &&
                     item.satelliteIdx === satelliteIdx &&
                     item.apiKeyIdx === apiKeyIdx
@@ -31,12 +31,14 @@ export class ImageCollection {
                 id
             });
             return;
+
+        } catch (e) {
+            console.log({e: JSON.stringify(e), file});
         }
 
-        console.log("unknown format:" + JSON.stringify(file));
     }
 
-    private getOrCreateDataNode(date: Date) {
+    private getOrCreateDataNode(date: FileDate) {
         if (!this.data) {
             console.log("this.data undefined!" + this.data);
             throw new Error();
@@ -44,27 +46,10 @@ export class ImageCollection {
         if (!date) {
             console.log(`date is undef:${date}`);
         }
-        if (Object.prototype.hasOwnProperty.call(this.data, date.valueOf())) {
-            return this.data[date.valueOf()];
+        if (Object.prototype.hasOwnProperty.call(this.data, date.getIdentifier())) {
+            return this.data[date.getIdentifier()];
         }
-        return this.data[date.valueOf()] = [];
-    }
-
-    private static parseDateYYYYMMDDhhmm(dateToParse: string): Date {
-        if (!dateToParse.match(/\d{12}/g)) {
-            console.error(`Data format mismatch: ${dateToParse}`);
-            throw new Error();
-        }
-        const year = parseInt(dateToParse.substr(0, 4));
-        const months = parseInt(dateToParse.substr(4, 2));
-        const days = parseInt(dateToParse.substr(6, 2));
-        const hours = parseInt(dateToParse.substr(8, 2));
-        const minutes = parseInt(dateToParse.substr(10, 2));
-
-        const date = new Date();
-        date.setUTCFullYear(year, months, days);
-        date.setUTCHours(hours, minutes);
-        return date;
+        return this.data[date.getIdentifier()] = [];
     }
 
     private static addIfNotExist(collection: any[], element: any): number {
@@ -91,7 +76,7 @@ export class ImageCollection {
     private static notAddedCtr: number = 0;
 
 
-    public get notAddedCounter(): number {
+    public static get notAddedCounter(): number {
         return ImageCollection.notAddedCtr;
     }
 
