@@ -4,7 +4,6 @@
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
-    "moment": "^2.21.0",
     "xmlhttprequest": "^1.8.0",
     "typescript": "^2.7.2"
   },
