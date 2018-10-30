@@ -13,7 +13,7 @@ Promise.all(drives.map(config => new drive(config.key, config.folder).driveResul
         const collection = new ImageCollection();
         results.map(driveResult => collection.addImages(driveResult.files, driveResult.apiKey));
         await uploadAll(collection);
-      //  await uploadToday(collection);
+        //  await uploadToday(collection);
     }).then(() => console.log("data grabbed and processed ;)"))
     .catch(err => console.error(err));
 
@@ -27,8 +27,16 @@ async function uploadToday(collection: ImageCollection) {
 }
 
 async function uploadAll(collection: ImageCollection) {
-    await httpHandler.put({
-        url: `${firebaseConfig.url}?print=silent`,
-        body: JSON.stringify(collection)
-    });
+    try {
+        console.log('updating');
+        const data = collection.serialize();
+        await httpHandler.put({
+            url: `${firebaseConfig.url}?print=silent`,
+            body: JSON.stringify(data)
+        });
+        console.log("updated: " + firebaseConfig.url);
+    }
+    catch (e) {
+        console.error(e);
+    }
 }

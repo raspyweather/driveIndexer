@@ -173,6 +173,9 @@ export class ImageCollection {
     public static get notAddedCounter(): number {
         return ImageCollection.notAddedCtr;
     }
+    public serialize(){
+        return this.data;
+    }
 
     private data: ImageCollectionData;
 }
