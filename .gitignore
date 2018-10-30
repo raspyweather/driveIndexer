@@ -63,3 +63,4 @@ typings/
 #exclude config
 src/driveConfig.*
 src/firebaseConfig.*
+dist

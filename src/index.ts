@@ -3,22 +3,32 @@ import {ImageCollection} from "./imageCollection";
 import {drive} from "./drive";
 import {drives} from "./driveConfig";
 import {firebaseConfig} from "./firebaseConfig";
+import {FileDate} from "./FileDate";
+
 
 console.log('drive indexer started');
-httpHandler.get({url: firebaseConfig.url})
-    .then(result => {
-        const collection = new ImageCollection();
-        console.log(Object.keys(JSON.parse(result).data).length);
-        console.log("stuff added");
-        Promise.all(drives.map(config => new drive(config.key, config.folder).driveResult))
-            .then(results =>
-                results.map(driveResult => collection.addImages(driveResult.files, driveResult.apiKey)))
-            .then(() => console.log("data grabbed and processed ;)"))
-            .then(async () =>
-                await httpHandler.put({
-                    url: `${firebaseConfig.url}?print=silent`,
-                    body: JSON.stringify(collection)
-                })
-            ).then(x => console.log("success:" + x + " dt" + Object.keys(JSON.parse(JSON.stringify(collection)).data).length + " notadded:" + ImageCollection.notAddedCounter)).catch(err => console.error(err));
-    }).catch(err => console.error(err));
 
+Promise.all(drives.map(config => new drive(config.key, config.folder).driveResult))
+    .then(async results => {
+        const collection = new ImageCollection();
+        results.map(driveResult => collection.addImages(driveResult.files, driveResult.apiKey));
+        await uploadAll(collection);
+      //  await uploadToday(collection);
+    }).then(() => console.log("data grabbed and processed ;)"))
+    .catch(err => console.error(err));
+
+async function uploadToday(collection: ImageCollection) {
+    const dateToday = FileDate.fromDate(new Date());
+    const today = collection.getDateNode(dateToday);
+    await httpHandler.put({
+        url: `${firebaseConfig.baseUrl}?print=silent`,
+        body: JSON.stringify(today)
+    });
+}
+
+async function uploadAll(collection: ImageCollection) {
+    await httpHandler.put({
+        url: `${firebaseConfig.url}?print=silent`,
+        body: JSON.stringify(collection)
+    });
+}

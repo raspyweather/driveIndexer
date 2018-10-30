@@ -1,4 +1,9 @@
 interface driveResult {
     apiKey: string,
-    files: any[]
+    files: {
+        kind: string,
+        id: string,
+        name: string,
+        mimeType: string
+    }[]
 }

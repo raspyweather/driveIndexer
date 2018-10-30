@@ -18,6 +18,15 @@ export class FileDate {
             this.minute.toString().padStart(2, '0');
     }
 
+    public static fromDate(date: Date): FileDate {
+        return new FileDate(
+            date.getFullYear(),
+            date.getMonth() + 1,
+            date.getDate(),
+            date.getHours(),
+            date.getMinutes());
+    }
+
     public static IsNewerAs(currentData: FileDate, otherDate: FileDate) {
         return this.CompareTo(currentData, otherDate) === 'newer';
     }
@@ -48,7 +57,7 @@ export class FileDate {
 }
 
 export class NoaaFileParser {
-    public static parse(filename: string) {
+    public static parse(filename: string): NoaaFileInfo {
         const noaaRegex1 = new RegExp(/noaa-\d{2}-\d{12}-\w{1,13}\.jpg/);
         const noaaRegex2 = new RegExp(/noaa-\d{12}-\w{1,13}\.jpg/);
         if (noaaRegex1.test(filename)) {
@@ -65,7 +74,7 @@ export class NoaaFileParser {
             return <NoaaFileInfo>{date, satelliteName: '', mode};
         }
         console.log('not supported: ' + filename);
-        throw  new Error();
+        throw new Error();
     }
 
     private static parseNoaaDate(noaaDate: string): FileDate {
